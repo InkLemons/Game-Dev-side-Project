@@ -4,30 +4,36 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    private float horizontal;
-    [SerializeField]private float MovementSpeed = 10f;
-    [SerializeField]private float JumpHeight = 8f;
-    [SerializeField]private Rigidbody2D PlayerRB;
-    [SerializeField]private Transform groundCheck;
-    [SerializeField]private LayerMask groundLayer;
+    public Rigidbody2D rb;
+    public float moveSpeed;
+    public Vector2 forceToApply;
+    public float forceDamping;
+
+    void Start()
+    {
+
+    }
 
     // Update is called once per frame
-    private bool IsGrounded()
-    {
-        return Physics2D.OverlapCircle(groundCheck.position, 0.2f, groundLayer);
-    }
     void Update()
     {
-        horizontal = Input.GetAxisRaw("Horizontal");
-
-        if (Input.GetButtonDown("Jump") && IsGrounded())
+        Vector2 PlayerInput = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")).normalized;
+        Vector2 moveForce = PlayerInput * moveSpeed;
+        moveForce += forceToApply;
+        forceToApply /= forceDamping;
+        if (Mathf.Abs(forceToApply.x) <= 0.01f && Mathf.Abs(forceToApply.y) <= 0.01f)
         {
-            PlayerRB.velocity = new Vector2(PlayerRB.velocity.x, JumpHeight);
+            forceToApply = Vector2.zero;
         }
+        rb.velocity = moveForce;
     }
 
-    private void FixedUpdate()
+    private void OnCollisionEnter2D(Collision2D collision)
     {
-        PlayerRB.velocity = new Vector2(horizontal * MovementSpeed, PlayerRB.velocity.y);
+        if (collision.collider.CompareTag("Bullet"))
+        {
+            forceToApply += new Vector2(-20, 0);
+            Destroy(collision.gameObject);
+        }
     }
 }
