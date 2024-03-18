@@ -5,7 +5,9 @@ using UnityEngine.SceneManagement;
 
 public class LevelLoader : MonoBehaviour
 {
-    
+    public Animator transition;
+
+    public float transitionTime = 1f;
 
     // Update is called once per frame
     void Update()
@@ -18,6 +20,18 @@ public class LevelLoader : MonoBehaviour
 
     public void LoadNextLevel()
     {
-        SceneManager.LoadScene(SceneManagement.GetActiveScene().buildIndex + 1);
+        StartCoroutine(LoadLevel(SceneManager.GetActiveScene().buildIndex +1));
+    }
+
+    IEnumerator LoadLevel(int levelIndex)
+    {
+       //Play Animation
+       transition.SetTrigger("Start");
+
+       //Wait
+       yield return new WaitForSeconds(1);
+
+       //Load Scene
+       SceneManager.LoadScene(levelIndex);
     }
 }
